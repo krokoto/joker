@@ -1515,7 +1515,10 @@ onMounted(() => {
   position: absolute;
   width: 90px;
   height: 130px;
-  background: linear-gradient(135deg, #6b3ec9, #2d0d6e);
+  background-image: url('/卡背.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   border: 2px solid #1a0f24;
   border-radius: 8px;
 }

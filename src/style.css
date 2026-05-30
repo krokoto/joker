@@ -1,0 +1,182 @@
+/* ============================================================
+   Balatro 蓝色水纹主题 · 全局基础样式
+   ============================================================ */
+
+:root {
+  --bg-deep:     #0a1438;
+  --bg-water:    #1a2858;
+  --bg-glow:     #2d4080;
+  --sb-blue:    #4a6bff;
+  --sb-blue-dk: #2d4080;
+  --sb-panel:   #1a2858;
+  --inset:      #050818;
+  --chips-from: #4dd6ff;
+  --chips-to:   #2196f3;
+  --mult-from:  #ff8844;
+  --mult-to:    #ff3344;
+  --gold:       #ffc857;
+  --money:      #ffb030;
+  --btn-red:    #ff3838;
+  --btn-orange: #ff8800;
+  --btn-blue:   #4a6bff;
+  --btn-green:  #62d18b;
+  --btn-discard:#ff5544;
+  --text:       #ffffff;
+  --text-dim:   #c9d2e8;
+  --muted:      #8a9bbf;
+  --paper-1:    #fff8e1;
+  --paper-2:    #f7e9c4;
+  --paper-3:    #e9d6a4;
+  --card-edge:  #1a0f24;
+  --pixel:      'Press Start 2P', monospace;
+  --display:    'VT323', monospace;
+  --sans:       'Inter', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  --line-soft:  rgba(74,107,255,.3);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  min-height: 100vh;
+  color: var(--text);
+  font-family: var(--sans);
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 40%, rgba(45,64,128,.6), transparent 70%),
+    radial-gradient(ellipse 120% 80% at 30% 70%, rgba(74,107,255,.15), transparent 60%),
+    repeating-linear-gradient(45deg, rgba(255,255,255,.012) 0 2px, transparent 2px 4px),
+    linear-gradient(135deg, #0a1438 0%, #1a2858 50%, #0a1438 100%);
+  background-attachment: fixed;
+}
+
+#app {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ===== 通用飞字动画 ===== */
+.fly-text {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  font-weight: 900;
+  text-shadow: 0 1px 4px rgba(0,0,0,.8);
+  white-space: nowrap;
+}
+
+/* ===== 按钮基础 ===== */
+.px-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 52px;
+  padding: 14px 26px;
+  border-radius: 12px;
+  font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-shadow: 0 1px 2px rgba(0,0,0,.45);
+  border: 2px solid rgba(0,0,0,.35);
+  transition: all 0.15s ease;
+  cursor: pointer;
+  color: #fff;
+  outline: none;
+  user-select: none;
+  white-space: nowrap;
+}
+.px-btn:hover:not([disabled])  { transform: translateY(-2px); filter: brightness(1.1) saturate(1.15); }
+.px-btn:active:not([disabled]) { transform: translateY(2px);  filter: brightness(0.92); }
+.px-btn[disabled]              { opacity: 0.45; cursor: not-allowed; filter: grayscale(0.3); }
+
+/* 出牌按钮 翠绿 */
+.px-btn.btn-play {
+  background: linear-gradient(180deg, #34d399 0%, #10b981 50%, #059669 100%);
+  box-shadow: 0 5px 0 #047857, 0 8px 18px rgba(52,211,153,.3), inset 0 1px 0 rgba(255,255,255,.3);
+}
+
+/* 弃牌/重开 红色 */
+.px-btn.btn-discard, .px-btn.btn-restart {
+  background: linear-gradient(180deg, #fb7185 0%, #ef4444 50%, #dc2626 100%);
+  box-shadow: 0 5px 0 #991b1b, 0 8px 18px rgba(239,68,68,.3), inset 0 1px 0 rgba(255,255,255,.3);
+}
+
+/* 排序 ghost 紫蓝 */
+.px-btn.btn-sort {
+  background: linear-gradient(180deg, rgba(99,102,241,.28) 0%, rgba(67,56,202,.20) 100%);
+  box-shadow: 0 3px 0 rgba(67,56,202,.4), inset 0 1px 0 rgba(255,255,255,.1);
+  border: 2px solid rgba(99,102,241,.5);
+  font-size: 14px;
+  min-height: 44px;
+  color: var(--text-dim);
+}
+
+/* 设置橙 */
+.px-btn.btn-settings {
+  background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+  box-shadow: 0 4px 0 #92400e, 0 6px 12px rgba(245,158,11,.35), inset 0 1px 0 rgba(255,255,255,.3);
+  width: 44px; height: 44px;
+  min-height: 44px;
+  padding: 0;
+  font-size: 22px;
+  border-radius: 12px;
+}
+
+/* 商店跳过 蓝紫 */
+.px-btn.btn-skip {
+  background: linear-gradient(180deg, #818cf8 0%, #6366f1 50%, #4338ca 100%);
+  box-shadow: 0 5px 0 #312e81, 0 8px 18px rgba(99,102,241,.3), inset 0 1px 0 rgba(255,255,255,.3);
+}
+
+/* AI 出牌 紫色霓虹 */
+.px-btn.btn-ai {
+  background: linear-gradient(180deg, #c084fc 0%, #a855f7 50%, #7e22ce 100%);
+  box-shadow: 0 5px 0 #581c87, 0 8px 18px rgba(168,85,247,.4), inset 0 1px 0 rgba(255,255,255,.3);
+}
+.px-btn.btn-ai.thinking {
+  animation: ai-pulse 1s ease-in-out infinite;
+}
+@keyframes ai-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 5px 0 #581c87, 0 8px 18px rgba(168,85,247,.4), inset 0 1px 0 rgba(255,255,255,.3); }
+  50% { transform: scale(1.05); box-shadow: 0 5px 0 #581c87, 0 12px 28px rgba(168,85,247,.7), inset 0 1px 0 rgba(255,255,255,.3); }
+}
+
+/* ===== Joker triggered glow ===== */
+@keyframes joker-glow {
+  0%   { transform: translateY(0) scale(1); box-shadow: none; }
+  20%  { transform: translateY(-18px) scale(1.15); box-shadow: 0 0 16px 6px rgba(255,200,50,.8), 0 0 32px 12px rgba(255,200,50,.4); }
+  80%  { transform: translateY(-18px) scale(1.15); box-shadow: 0 0 16px 6px rgba(255,200,50,.8), 0 0 32px 12px rgba(255,200,50,.4); }
+  100% { transform: translateY(0) scale(1); box-shadow: none; }
+}
+
+/* ===== 公式爆字 ===== */
+@keyframes formula-pop {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
+  30%  { opacity: 1; transform: translate(-50%, -50%) scale(1.12); }
+  60%  { transform: translate(-50%, -50%) scale(1.0); }
+  85%  { opacity: 1; transform: translate(-50%, -50%) scale(1.0); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(0.85); }
+}
+
+/* ===== chips/mult 块跳动 ===== */
+@keyframes score-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.15); }
+  70%  { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+.score-pop-anim {
+  animation: score-pop 0.3s ease-out;
+}
+
+/* ===== 进度条 ===== */
+@keyframes progress-fill {
+  from { width: var(--from-w); }
+}

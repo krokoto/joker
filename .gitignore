@@ -1,0 +1,21 @@
+# ===== 通用 =====
+.DS_Store
+*.log
+.env*
+build/
+dist/
+
+# IDE / 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ===== Node / Web 前端 =====
+node_modules/
+.npm/
+.pnpm-store/
+.cache/
+.vite/
+coverage/
+*.local

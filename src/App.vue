@@ -1,6 +1,6 @@
 <template>
   <!-- ===== 设置按钮（右上角浮层） ===== -->
-  <button class="px-btn btn-settings settings-float" @click="showSettings = true" title="设置">⚙️</button>
+  <button class="px-btn btn-settings settings-float" @click="showSettings = true; sfx13ButtonClick()" title="设置">⚙️</button>
 
   <!-- ===== 设置 Modal ===== -->
   <Teleport to="body">
@@ -10,18 +10,18 @@
         <div class="settings-items">
           <div class="settings-row">
             <span class="settings-label">BGM 音量</span>
-            <input type="range" min="0" max="100" v-model="settings.bgmVolume" class="settings-slider" style="accent-color:#4dd6ff" />
+            <input type="range" min="0" max="100" v-model="settings.bgmVolume" class="settings-slider" style="accent-color:#4dd6ff" @input="sfx15Slider()" />
           </div>
           <div class="settings-row">
             <span class="settings-label">SFX 音量</span>
-            <input type="range" min="0" max="100" v-model="settings.sfxVolume" class="settings-slider" style="accent-color:#ff8844" />
+            <input type="range" min="0" max="100" v-model="settings.sfxVolume" class="settings-slider" style="accent-color:#ff8844" @input="sfx15Slider()" />
           </div>
           <div class="settings-row">
             <span class="settings-label">动画速度</span>
             <div class="speed-btns">
-              <button :class="['speed-btn', settings.speed === 'slow' && 'active']" @click="settings.speed = 'slow'">慢</button>
-              <button :class="['speed-btn', settings.speed === 'normal' && 'active']" @click="settings.speed = 'normal'">普通</button>
-              <button :class="['speed-btn', settings.speed === 'fast' && 'active']" @click="settings.speed = 'fast'">快</button>
+              <button :class="['speed-btn', settings.speed === 'slow' && 'active']" @click="settings.speed = 'slow'; sfx15Slider()">慢</button>
+              <button :class="['speed-btn', settings.speed === 'normal' && 'active']" @click="settings.speed = 'normal'; sfx15Slider()">普通</button>
+              <button :class="['speed-btn', settings.speed === 'fast' && 'active']" @click="settings.speed = 'fast'; sfx15Slider()">快</button>
             </div>
           </div>
           <div class="settings-row">
@@ -32,7 +32,7 @@
           </div>
         </div>
         <div class="settings-footer">
-          <button class="px-btn btn-skip settings-close-btn" @click="showSettings = false">关闭</button>
+          <button class="px-btn btn-skip settings-close-btn" @click="showSettings = false; sfx13ButtonClick()">关闭</button>
         </div>
       </div>
     </div>
@@ -119,7 +119,7 @@
       </div>
 
       <!-- 重新开始按钮 -->
-      <button class="px-btn btn-restart restart-btn" @click="restartGame">重新开始</button>
+      <button class="px-btn btn-restart restart-btn" @click="restartGame(); sfx13ButtonClick()">重新开始</button>
     </aside>
 
     <!-- ===== 右主区 ===== -->
@@ -232,8 +232,8 @@
             :disabled="selectedCards.length === 0 || discardsLeft === 0 || isAnimating"
             @click="handleDiscard"
           >弃牌 ({{ discardsLeft }})</button>
-          <button class="px-btn btn-sort" @click="sortByRank">按点排序</button>
-          <button class="px-btn btn-sort" @click="sortBySuit">按花排序</button>
+          <button class="px-btn btn-sort" @click="sortByRank(); sfx13ButtonClick()">按点排序</button>
+          <button class="px-btn btn-sort" @click="sortBySuit(); sfx13ButtonClick()">按花排序</button>
           <button
             :class="['px-btn', 'btn-ai', aiThinking && 'thinking']"
             :disabled="aiThinking || isAnimating"
@@ -264,8 +264,8 @@
               </div>
             </div>
             <div class="shop-footer">
-              <button class="px-btn btn-ai" @click="handleAiShopSuggest">🤖 AI 建议</button>
-              <button class="px-btn btn-skip" @click="skipShop">跳过 →</button>
+              <button class="px-btn btn-ai" @click="handleAiShopSuggest(); sfx13ButtonClick()">🤖 AI 建议</button>
+              <button class="px-btn btn-skip" @click="skipShop(); sfx13ButtonClick()">跳过 →</button>
             </div>
           </div>
         </div>
@@ -288,7 +288,7 @@
                 </div>
               </div>
             </div>
-            <button class="px-btn btn-restart" @click="restartGame">重新开始</button>
+            <button class="px-btn btn-restart" @click="restartGame(); sfx13ButtonClick()">重新开始</button>
           </div>
         </div>
       </Transition>
@@ -328,6 +328,13 @@ import {
   BLINDS, HAND_TYPES, JOKER_LIBRARY, calcReward,
   aiBestPlay, aiBestShopJoker, isJokerTriggered, jokerEffectDesc, cardValue
 } from './game.js'
+import {
+  initBgm, setupAutoplayUnlock, setBgmVolume, setSfxVolume,
+  sfx01SelectCard, sfx02DeselectCard, sfx03PlayFly, sfx04ScoreTick,
+  sfx05JokerGlow, sfx06ScoreBoom, sfx07Deal, sfx08Win, sfx09Lose,
+  sfx10EnterShop, sfx11Coins, sfx12BuyJoker, sfx13ButtonClick,
+  sfx14Discard, sfx15Slider, startAiPulse, stopAiPulse, sfx17AiDecide
+} from './audio.js'
 
 // ===== 设置 =====
 function loadSettings() {
@@ -343,6 +350,8 @@ const showSettings = ref(false)
 
 watch(settings, (v) => {
   localStorage.setItem('balatro.settings', JSON.stringify(v))
+  setBgmVolume(v.bgmVolume)
+  setSfxVolume(v.sfxVolume)
 }, { deep: true })
 
 function speedMultiplier() {
@@ -493,6 +502,7 @@ function animDealCards(cards, startIdx) {
 
       // 下一帧开始飞
       requestAnimationFrame(() => requestAnimationFrame(() => {
+        sfx07Deal()  // SFX-07 发牌入手（每张错峰触发）
         const idx = flyCards.value.findIndex(f => f.id === fcId)
         if (idx >= 0) {
           flyCards.value[idx] = {
@@ -520,9 +530,11 @@ function toggleSelect(card) {
   const idx = selectedCards.value.indexOf(card.id)
   if (idx >= 0) {
     selectedCards.value.splice(idx, 1)
+    sfx02DeselectCard()  // SFX-02 取消选牌
   } else {
     if (selectedCards.value.length < 5) {
       selectedCards.value.push(card.id)
+      sfx01SelectCard()  // SFX-01 选牌
     }
   }
   // 更新预览牌型
@@ -548,6 +560,7 @@ async function handlePlay() {
   const selected = handCards.value.filter(c => selectedCards.value.includes(c.id))
 
   // Step 1: 飞牌到出牌区 (350ms)
+  sfx03PlayFly()  // SFX-03 出牌飞牌
   await animFlyToPlayArea(selected)
 
   // 从手牌移除，加入出牌区
@@ -568,6 +581,7 @@ async function handlePlay() {
   for (let i = 0; i < playedCards.value.length; i++) {
     await wait(T(150))
     playedCards.value[i] = { ...playedCards.value[i], highlighted: true }
+    sfx04ScoreTick(i)  // SFX-04 逐张高亮计分（音高随索引递增）
     const val = cardValue(playedCards.value[i].rank)
     runningChips += val
     displayChips.value = runningChips
@@ -590,6 +604,7 @@ async function handlePlay() {
     await wait(T(300))
     // Joker 金光
     jokerGlowing.value[i] = true
+    sfx05JokerGlow()  // SFX-05 Joker 触发金光
     setTimeout(() => { jokerGlowing.value[i] = false }, T(800))
 
     // 执行 joker effect
@@ -622,6 +637,7 @@ async function handlePlay() {
   formulaMult.value = finalMult
   formulaScore.value = finalScore
   showFormula.value = true
+  sfx06ScoreBoom()  // SFX-06 公式爆出大字
 
   // Step 6: blindScore RAF 累加 (与 step 5 重叠)
   const prevScore = blindScore.value
@@ -656,6 +672,7 @@ async function handlePlay() {
   if (handsLeft.value <= 0) {
     await wait(T(200))
     gameState.value = 'lost'
+    sfx09Lose()  // SFX-09 关卡失败
     isAnimating.value = false
     return
   }
@@ -750,6 +767,8 @@ async function handleDiscard() {
   if (selectedCards.value.length === 0 || discardsLeft.value === 0 || isAnimating.value) return
   isAnimating.value = true
 
+  sfx14Discard()  // SFX-14 弃牌
+
   const discardedCards = handCards.value.filter(c => selectedCards.value.includes(c.id))
   const discardedIds = discardedCards.map(c => c.id)
 
@@ -782,11 +801,14 @@ async function handleDiscard() {
 async function handleAiPlay() {
   if (aiThinking.value || isAnimating.value) return
   aiThinking.value = true
+  startAiPulse()  // SFX-16 AI 思考脉冲（每 400ms 一次，直到思考结束）
   await wait(T(800))
   const best = aiBestPlay(handCards.value, ownedJokers.value)
   selectedCards.value = best.map(c => c.id)
   updatePreviewHand()
   await wait(T(200))
+  stopAiPulse()   // 停止 SFX-16 循环
+  sfx17AiDecide() // SFX-17 AI 决策完成
   aiThinking.value = false
   await handlePlay()
 }
@@ -804,10 +826,14 @@ function enterShopOrWin() {
   // PRD §10.2: 大盲注通关 → won，不进商店
   if (currentBlindIndex.value >= BLINDS.length - 1) {
     gameState.value = 'won'
+    sfx08Win()  // SFX-08 通关胜利
     return
   }
   // 通关奖励
-  money.value += calcReward(currentBlind.value, handsLeft.value)
+  const reward = calcReward(currentBlind.value, handsLeft.value)
+  money.value += reward
+  sfx10EnterShop()  // SFX-10 进入商店
+  sfx11Coins(reward)  // SFX-11 金币到账（按金额连响）
   // 随机抽 3 张不重复商店 joker
   const shuffled = shuffle(JOKER_LIBRARY)
   shopJokers.value = shuffled.slice(0, 3)
@@ -855,6 +881,7 @@ function buyJoker(joker) {
   money.value -= joker.price
   ownedJokers.value.push(joker)
   boughtJokerIds.value.push(joker.id)
+  sfx12BuyJoker()  // SFX-12 买卡成功
 }
 
 // ===== 排序 =====
@@ -1047,6 +1074,13 @@ function wait(ms) {
 
 // ===== 挂载 =====
 onMounted(() => {
+  // 初始化 BGM（只创建 Audio 元素，不播放——等 autoplay 解锁后才播）
+  initBgm()
+  // 同步初始音量（localStorage 读回的值）
+  setBgmVolume(settings.value.bgmVolume)
+  setSfxVolume(settings.value.sfxVolume)
+  // 注册 autoplay 解锁监听（首次用户点击后才播 BGM + 允许 SFX）
+  setupAutoplayUnlock(() => settings.value.bgmVolume)
   initGame()
 })
 </script>

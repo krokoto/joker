@@ -1,0 +1,615 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>第 3 轮 · PRD · 音效系统（产品需求文档）</title>
+<style>
+  :root {
+    --bg: #fafaf7;
+    --ink: #1a1a1a;
+    --muted: #6a6a6a;
+    --line: #e3e0d8;
+    --gold: #b8860b;
+    --gold-bg: #fff8dc;
+    --purple: #5b3a8e;
+    --purple-bg: #f3eefa;
+    --red: #b91c1c;
+    --red-bg: #fef2f2;
+    --green: #15803d;
+    --green-bg: #f0fdf4;
+    --blue: #1d4ed8;
+    --blue-bg: #eff6ff;
+    --code-bg: #f4f1ea;
+    --code-border: #d9d2c0;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-family: 'Inter', system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif; font-size: 15px; line-height: 1.7; }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 56px 32px 120px; }
+
+  .doc-meta {
+    background: var(--purple-bg);
+    border: 1px solid var(--purple);
+    border-radius: 6px;
+    padding: 14px 18px;
+    margin-bottom: 32px;
+    font-size: 13px;
+    color: var(--purple);
+  }
+  .doc-meta strong { color: var(--purple); }
+
+  h1 { font-size: 32px; text-align: center; margin: 0 0 8px; letter-spacing: -0.5px; }
+  .subtitle { text-align: center; color: var(--muted); margin-bottom: 12px; font-size: 15px; }
+  .meta { text-align: center; color: var(--muted); font-size: 13px; margin-bottom: 32px; }
+  h2 { font-size: 22px; margin-top: 56px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--purple); color: var(--purple); }
+  h3 { font-size: 17px; margin-top: 32px; margin-bottom: 12px; color: var(--ink); }
+  h4 { font-size: 15px; margin-top: 20px; margin-bottom: 8px; color: var(--purple); }
+  p { margin: 12px 0; }
+  ul, ol { padding-left: 24px; margin: 12px 0; }
+  li { margin: 6px 0; }
+  code { background: var(--code-bg); border: 1px solid var(--code-border); border-radius: 4px; padding: 1px 6px; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; color: var(--purple); }
+  pre { background: var(--code-bg); border: 1px solid var(--code-border); border-left: 4px solid var(--purple); border-radius: 6px; padding: 16px 18px; overflow-x: auto; font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 13px; line-height: 1.6; }
+  pre code { background: none; border: none; padding: 0; color: var(--ink); }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+  th, td { border: 1px solid var(--line); padding: 8px 12px; text-align: left; vertical-align: top; }
+  th { background: var(--code-bg); font-weight: 600; }
+  .callout { border-left: 4px solid; border-radius: 4px; padding: 12px 16px; margin: 16px 0; background: #fff; }
+  .callout.tip { border-color: var(--blue); background: var(--blue-bg); }
+  .callout.warn { border-color: var(--red); background: var(--red-bg); }
+  .callout.win { border-color: var(--green); background: var(--green-bg); }
+  .callout.gold { border-color: var(--gold); background: var(--gold-bg); }
+  .callout strong { display: block; margin-bottom: 4px; }
+  .lock { display: inline-block; background: var(--gold-bg); color: var(--gold); border: 1px solid var(--gold); border-radius: 3px; padding: 0 6px; font-size: 11px; font-weight: 700; letter-spacing: 1px; vertical-align: middle; margin-left: 6px; }
+  .checklist { list-style: none; padding-left: 0; }
+  .checklist li { padding-left: 28px; position: relative; margin: 8px 0; }
+  .checklist li::before { content: '☐'; position: absolute; left: 8px; color: var(--purple); font-weight: 700; }
+  hr { border: none; border-top: 1px dashed var(--line); margin: 48px 0; }
+  .footer { text-align: center; color: var(--muted); font-size: 13px; margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--line); }
+  .flow {
+    display: flex; gap: 6px; flex-wrap: wrap; align-items: center;
+    background: var(--purple-bg); padding: 14px 18px; border-radius: 8px;
+    margin: 16px 0; font-family: 'JetBrains Mono', monospace; font-size: 13px;
+  }
+  .flow .node { background: white; border: 1px solid var(--purple); padding: 4px 10px; border-radius: 4px; }
+  .flow .arrow { color: var(--purple); font-weight: 700; }
+  .module-card {
+    background: white;
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--purple);
+    border-radius: 6px;
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+  .module-card h3 { margin-top: 0; color: var(--purple); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="doc-meta">
+  <strong>产品经理 AI 同事产物</strong>
+  本文档由产品经理 AI 同事产出，描述「做什么」而非「怎么做」。技术实施细节（Web Audio API 频率参数、Vue 钩子挂载位置、模块拆分方式）由全栈工程师 AI 同事在「实施指引」环节决定。
+  <br><br>
+  <strong>配套文档</strong>：<code>01-第1轮-PRD-小丑牌核心循环.html</code>（第 1 轮玩法基础）·
+  <code>01-第1轮-DESIGN-小丑牌核心循环.html</code>（设计规范，本轮无新增视觉需求）
+  <br><br>
+  <strong>本文档版本</strong>：第 3 轮 · 音效系统 · v1
+</div>
+
+<h1>第 3 轮 · PRD · 音效系统</h1>
+<p class="subtitle">让游戏「有声」—— BGM 自备文件循环播放 + SFX 全部 Web Audio API 代码合成，零下载零依赖</p>
+<p class="meta">课程版本：B2 · 第 3 轮 / 共 6 轮 · 文档版本：v1</p>
+
+<div class="callout gold">
+  <strong>本轮目标（必读）</strong>
+  第 1 轮已把设置面板的「BGM 音量」和「SFX 音量」两个滑块做好，状态写入 <code>localStorage</code>，本轮只是<b>把音频接上线</b>——让这两个滑块真正驱动声音。本轮不重做任何 UI，不新增任何设置项。粒子升级（通关撒金币、爆分粒子特效）同属原计划第 3 轮，但<b>不在本 PRD 范围内</b>，留给后续轮次单独处理。
+</div>
+
+<h2>一、产品概述</h2>
+
+<p>本轮目标：为小丑牌游戏接入完整音效体系，让玩家在出牌、计分、通关、商店等全流程中都有听觉反馈，大幅提升游戏手感与沉浸感。</p>
+
+<p>音效分两类：</p>
+<ul>
+  <li><b>BGM（背景音乐）</b>：由学员自备音频文件放入 <code>public/</code> 目录，游戏运行时循环播放，音量受设置面板「BGM 音量」滑块实时控制。</li>
+  <li><b>SFX（操作音效）</b>：全部用浏览器内置的 Web Audio API 代码合成，振荡器 + 包络生成像素电子音，零音频文件、零外部依赖、零下载、不联网。音量受设置面板「SFX 音量」滑块实时控制。</li>
+</ul>
+
+<h2>二、功能模块</h2>
+
+<!-- ============ 模块 1 ============ -->
+<div class="module-card">
+  <h3>M1 · 音频系统架构与 Autoplay 解锁策略</h3>
+
+  <h4>1.1 Autoplay 解锁约束 <span class="lock">锁定</span></h4>
+
+  <div class="callout warn">
+    <strong>浏览器 Autoplay 策略：页面加载后不得自动播放任何音频</strong>
+    现代浏览器（Chrome / Firefox / Safari）在用户首次与页面产生交互之前，禁止脚本发起音频播放，强行播放会被静默拦截或抛出 <code>NotAllowedError</code>。
+  </div>
+
+  <p>产品行为要求：</p>
+  <ul>
+    <li>页面加载完成后，<b>不</b>自动初始化 AudioContext，<b>不</b>自动播放 BGM，<b>不</b>报错。</li>
+    <li><b>首次用户交互</b>（点击任意按钮或手牌）时，才初始化 AudioContext 并解锁 BGM 播放。「首次交互」指用户在当前页面生命周期内第一次触发 <code>click</code> 事件。</li>
+    <li>解锁后，BGM 立即开始循环播放（若音量不为 0）；此后所有 SFX 调用均可正常发声。</li>
+    <li>解锁逻辑只触发一次，后续交互不重复执行。</li>
+  </ul>
+
+  <h4>1.2 整体架构约束 <span class="lock">锁定</span></h4>
+  <table>
+    <tr><th>项</th><th>要求</th></tr>
+    <tr><td>音频技术</td><td>BGM 用 HTML <code>&lt;audio&gt;</code> 元素或 AudioContext + AudioBufferSourceNode 加载文件；SFX 全部用 Web Audio API OscillatorNode + GainNode 合成</td></tr>
+    <tr><td>外部依赖</td><td>零外部音频库（不引入 Howler.js、Tone.js 等任何第三方音频库）</td></tr>
+    <tr><td>网络请求</td><td>SFX 不产生任何网络请求；BGM 仅加载本地 <code>public/</code> 目录下的文件，不联网</td></tr>
+    <tr><td>API Key</td><td>不需要任何 API Key</td></tr>
+  </table>
+</div>
+
+<!-- ============ 模块 2 ============ -->
+<div class="module-card">
+  <h3>M2 · BGM（背景音乐）</h3>
+
+  <h4>2.1 文件约定 <span class="lock">锁定</span></h4>
+  <table>
+    <tr><th>项</th><th>规则</th></tr>
+    <tr><td>文件位置</td><td><code>public/bgm.mp3</code>（首选）；也可放 <code>public/bgm.ogg</code> 或 <code>public/bgm.wav</code>，工程师按顺序尝试加载，取第一个存在的文件</td></tr>
+    <tr><td>文件来源</td><td>由学员自备，课程不提供版权音乐。PRD 只规定文件名约定，不规定音乐内容。</td></tr>
+    <tr><td>文件缺失降级</td><td><b>文件不存在时，BGM 模块静默降级，不报错、不弹框、不影响游戏运行</b>。SFX 不受影响，正常发声。</td></tr>
+  </table>
+
+  <h4>2.2 播放行为 <span class="lock">锁定</span></h4>
+  <ul>
+    <li>BGM 在「首次用户交互解锁」后立即开始播放（若音量不为 0）。</li>
+    <li>循环播放，不自动结束。</li>
+    <li>BGM 贯穿所有游戏状态（<code>playing</code> / <code>shop</code> / <code>won</code> / <code>lost</code>），不因状态切换而中断或重播。</li>
+    <li>音量由设置面板「BGM 音量」滑块（0–100）实时控制，映射关系见 M4。</li>
+    <li>BGM 音量为 0 时，BGM 静音（暂停播放或将音量设为 0，均可接受）；音量从 0 调回正值时，BGM 恢复播放。</li>
+  </ul>
+</div>
+
+<!-- ============ 模块 3 ============ -->
+<div class="module-card">
+  <h3>M3 · SFX（操作音效）—— 全代码合成</h3>
+
+  <div class="callout tip">
+    <strong>合成原则</strong>
+    所有 SFX 均通过 Web Audio API 的振荡器（OscillatorNode）+ 增益包络（GainNode）实时生成，无需任何音频文件。音色描述仅作为方向性指引，具体频率、波形、ADSR 参数由工程师在实现时决定，只要听感符合描述即为达标。
+  </div>
+
+  <h4>3.1 完整音效清单 <span class="lock">锁定</span></h4>
+
+  <p>共 17 个 SFX 事件，分 4 大类：</p>
+
+  <p><b>第 1 类：核心出牌类</b></p>
+  <table>
+    <tr>
+      <th>编号</th>
+      <th>音效名称</th>
+      <th>触发时机（对应代码事件）</th>
+      <th>音色描述</th>
+      <th>建议时长</th>
+      <th>归属</th>
+    </tr>
+    <tr>
+      <td>SFX-01</td>
+      <td>选牌 <span class="lock">锁定</span></td>
+      <td>手牌被点击切换为「选中」态时</td>
+      <td>短促轻快的上扬单音「滴」，清脆干净，音高中偏高</td>
+      <td>80ms</td>
+      <td>SFX</td>
+    </tr>
+    <tr>
+      <td>SFX-02</td>
+      <td>取消选牌 <span class="lock">锁定</span></td>
+      <td>已选中的手牌被点击取消选中时</td>
+      <td>与 SFX-01 对称的下行单音「嗒」，音高略低，有"收回"感</td>
+      <td>80ms</td>
+      <td>SFX</td>
+    </tr>
+    <tr>
+      <td>SFX-03</td>
+      <td>出牌飞牌 <span class="lock">锁定</span></td>
+      <td><code>handlePlay()</code> Step 1 飞牌动画开始时（约 350ms 飞行起点）</td>
+      <td>快速下扫的「嗖」声，带轻微混响，短促有力</td>
+      <td>200ms</td>
+      <td>SFX</td>
+    </tr>
+    <tr>
+      <td>SFX-04</td>
+      <td>逐张高亮计分滴声 <span class="lock">锁定</span></td>
+      <td><code>handlePlay()</code> Step 3 每张牌高亮时各触发一次（每张 150ms 间隔）；音高随高亮顺序递增（第 1 张最低，第 5 张最高），营造上行琶音感</td>
+      <td>短促单音「滴」，每次约 100ms，5 张共 5 个音高档</td>
+      <td>100ms × 张数</td>
+      <td>SFX</td>
+    </tr>
+    <tr>
+      <td>SFX-05</td>
+      <td>Joker 触发金光 <span class="lock">锁定</span></td>
+      <td><code>handlePlay()</code> Step 4 每个 Joker 触发金光（<code>jokerGlowing[i] = true</code>）时各触发一次</td>
+      <td>神秘感电子音「嗡叮」，先低后高，有一点混响，暗示魔法效果</td>
+      <td>350ms</td>
+      <td>SFX</td>
+    </tr>
+    <tr>
+      <td>SFX-06</td>
+      <td>计分公式爆出 <span class="lock">锁定</span></td>
+      <td><code>handlePlay()</code> Step 5 公式大字出现时（<code>showFormula = true</code>）</td>
+      <td>爽快的「砰嗡」冲击音，低频厚重 + 高频亮点，有明显的"爽感"，这是全局最响最爽的音</td>
+      <td>500ms</td>
+      <td>SFX</td>
+    </tr>
+    <tr>
+      <td>SFX-07</td>
+      <td>发牌入手 <span class="lock">锁定</span></td>
+      <td>补牌动画中每张牌飞入手牌槽时各触发一次（每张错峰 60ms）</td>
+      <td>轻柔的「啪」，像纸牌翻转落桌，音量比出牌音效轻，不抢主戏</td>
+      <td>100ms</td>
+      <td>SFX</td>
+    </tr>
+  </table>
+
+  <p><b>第 2 类：胜负与关卡类</b></p>
+  <table>
+    <tr>
+      <th>编号</th>
+      <th>音效名称</th>
+      <th>触发时机（对应代码事件）</th>
+      <th>音色描述</th>
+      <th>建议时长</th>
+      <th>归属</th>
+    </tr>
+    <tr>
+      <td>SFX-08</td>
+      <td>通关胜利 <span class="lock">锁定</span></td>
+      <td><code>gameState</code> 变为 <code>'won'</code> 时（大盲注通关）</td>
+      <td>欢快上行琶音 + 小号角尾音，5–7 个音节，由低到高，最后收一个长音，有庆典感</td>
+      <td>1200ms</td>
+      <td>SFX</td>
+    </tr>
+    <tr>
+      <td>SFX-09</td>
+      <td>关卡失败 <span class="lock">锁定</span></td>
+      <td><code>gameState</code> 变为 <code>'lost'</code> 时</td>
+      <td>下行 3 音「呜哦唔」，低沉沮丧，末音带渐弱消散</td>
+      <td>800ms</td>
+      <td>SFX</td>
+    </tr>
+    <tr>
+      <td>SFX-10</td>
+      <td>进入商店 <span class="lock">锁定</span></td>
+      <td><code>gameState</code> 变为 <code>'shop'</code> 时（<code>enterShopOrWin()</code> 中小/中盲注通关分支）</td>
+      <td>轻盈上扬双音「叮咚」，欢快感，像开门铃</td>
+      <td>400ms</td>
+      <td>SFX</td>
+    </tr>
+    <tr>
+      <td>SFX-11</td>
+      <td>金币到账 <span class="lock">锁定</span></td>
+      <td><code>money.value += calcReward()</code> 执行后，按奖励金额连响：金额 ≤ 5 响 1 次，6–7 响 2 次，8 以上响 3 次</td>
+      <td>清脆硬币碰撞音「叮」，每次间隔 120ms，音高可稍有随机微变</td>
+      <td>120ms × 次数</td>
+      <td>SFX</td>
+    </tr>
+  </table>
+
+  <p><b>第 3 类：商店与按钮类</b></p>
+  <table>
+    <tr>
+      <th>编号</th>
+      <th>音效名称</th>
+      <th>触发时机（对应代码事件）</th>
+      <th>音色描述</th>
+      <th>建议时长</th>
+      <th>归属</th>
+    </tr>
+    <tr>
+      <td>SFX-12</td>
+      <td>买卡成功 <span class="lock">锁定</span></td>
+      <td><code>buyJoker()</code> 购买成功时（满足条件、金币已扣减）</td>
+      <td>愉悦的上行双音「叮当」，比 SFX-10 短促，带一点回响，有"入账"感</td>
+      <td>300ms</td>
+      <td>SFX</td>
+    </tr>
+    <tr>
+      <td>SFX-13</td>
+      <td>按钮通用反馈 <span class="lock">锁定</span></td>
+      <td>所有可点击按钮被触发时（弃牌、排序、跳过、重新开始、关闭设置等；选牌/取消选牌用 SFX-01/02，不用此音）</td>
+      <td>短促中性「咔哒」，功能性，不突出，音量偏小</td>
+      <td>60ms</td>
+      <td>SFX</td>
+    </tr>
+    <tr>
+      <td>SFX-14</td>
+      <td>弃牌 <span class="lock">锁定</span></td>
+      <td><code>handleDiscard()</code> 执行时</td>
+      <td>低沉短促「噗」，有一点"扔出去"的感觉，比 SFX-13 更有质感</td>
+      <td>120ms</td>
+      <td>SFX</td>
+    </tr>
+    <tr>
+      <td>SFX-15</td>
+      <td>UI 滑块/设置反馈 <span class="lock">锁定</span></td>
+      <td>设置面板滑块被拖动时（节流：每 100ms 最多触发一次）；动画速度按钮切换时</td>
+      <td>极短轻柔「嘀」，几乎像鼠标点击音，不打扰操作</td>
+      <td>40ms</td>
+      <td>SFX</td>
+    </tr>
+  </table>
+
+  <p><b>第 4 类：AI 出牌类</b></p>
+  <table>
+    <tr>
+      <th>编号</th>
+      <th>音效名称</th>
+      <th>触发时机（对应代码事件）</th>
+      <th>音色描述</th>
+      <th>建议时长</th>
+      <th>归属</th>
+    </tr>
+    <tr>
+      <td>SFX-16</td>
+      <td>AI 思考中脉冲音 <span class="lock">锁定</span></td>
+      <td><code>aiThinking = true</code> 期间，每 400ms 播放一次，循环至思考结束（约播 2 次，总思考约 800ms）</td>
+      <td>科技感低频短促「嘟」，像扫描脉冲，带轻微金属感，表达计算进行中</td>
+      <td>200ms</td>
+      <td>SFX</td>
+    </tr>
+    <tr>
+      <td>SFX-17</td>
+      <td>AI 决策完成 <span class="lock">锁定</span></td>
+      <td><code>aiThinking = false</code>（决策完成，即将出牌）时，紧接在 SFX-16 最后一次播放之后</td>
+      <td>上扬确定的「叮」，比 SFX-01 饱满，有"锁定目标"感，表达决策就绪</td>
+      <td>200ms</td>
+      <td>SFX</td>
+    </tr>
+  </table>
+
+  <div class="callout tip">
+    <strong>音高递增约束（SFX-04 专项）</strong>
+    SFX-04 逐张高亮的 5 个音高档之间，间隔应感知明显（不要过于相近）。最低档和最高档之间的音程感觉上应达到大约一个八度或以上，使连续出牌时产生明显的上行琶音感。具体频率由工程师决定，验收时以「听感有明显上行感」为准。
+  </div>
+</div>
+
+<!-- ============ 模块 4 ============ -->
+<div class="module-card">
+  <h3>M4 · 音量控制与设置接线</h3>
+
+  <h4>4.1 音量接线 <span class="lock">锁定</span></h4>
+
+  <div class="callout gold">
+    <strong>本轮核心工作：让第 1 轮已有的滑块真正驱动声音</strong>
+    <code>settings.bgmVolume</code>（默认 50）和 <code>settings.sfxVolume</code>（默认 70）在第 1 轮已存在于 <code>App.vue</code>，由 <code>watch(settings, ...)</code> 持久化到 <code>localStorage</code> key = <code>balatro.settings</code>。本轮在此基础上接线，不修改设置面板 UI，不新增 <code>ref</code>，只让这两个值驱动音频。
+  </div>
+
+  <table>
+    <tr><th>滑块</th><th>对应 key</th><th>范围</th><th>默认值 <span class="lock">锁定</span></th><th>控制范围</th></tr>
+    <tr><td>BGM 音量</td><td><code>settings.bgmVolume</code></td><td>0–100</td><td>50</td><td>BGM 播放音量（HTML audio 的 volume 属性，映射：滑块值 ÷ 100 = 0.0–1.0）</td></tr>
+    <tr><td>SFX 音量</td><td><code>settings.sfxVolume</code></td><td>0–100</td><td>70</td><td>所有 SFX-01 至 SFX-17 的 GainNode 增益（映射同上）</td></tr>
+  </table>
+
+  <h4>4.2 实时响应要求 <span class="lock">锁定</span></h4>
+  <ul>
+    <li>拖动 BGM 音量滑块时，BGM 播放音量<b>即时</b>响应（不需要松开鼠标才生效）。</li>
+    <li>拖动 SFX 音量滑块时，下一个 SFX 触发时以新音量播放（已在播放中的 SFX 不受影响，自然结束即可）。</li>
+    <li>BGM 音量调至 0：BGM 停止发声（静音或暂停均可接受，暂停更省资源）。</li>
+    <li>SFX 音量调至 0：所有 SFX 静音（播放时 GainNode 增益设为 0）。</li>
+    <li>刷新页面后，<code>localStorage</code> 中保存的音量值被读回，BGM 以此音量继续播放（待首次交互解锁后），SFX 以此音量发声。</li>
+  </ul>
+
+  <h4>4.3 动画速度倍率与音效的关系 <span class="lock">锁定</span></h4>
+  <p><b>音效不随动画速度变调变速。</b>设置面板中「动画速度」（慢 / 普通 / 快）只影响动画时间线的时间缩放（第 1 轮 PRD §5.1），不影响任何 SFX 的音高、时长或触发时机。每个音效在其对应的真实事件点触发，与动画时长无关。</p>
+</div>
+
+<h2>三、关键交互说明</h2>
+
+<h3>3.1 Autoplay 解锁流程</h3>
+
+<div class="flow">
+  <span class="node">页面加载</span>
+  <span class="arrow">→</span>
+  <span class="node">音频未初始化，静默等待</span>
+  <span class="arrow">→</span>
+  <span class="node">用户首次点击（任意按钮/牌）</span>
+  <span class="arrow">→</span>
+  <span class="node">初始化 AudioContext</span>
+  <span class="arrow">→</span>
+  <span class="node">BGM 开始播放（若音量 &gt; 0 且文件存在）</span>
+  <span class="arrow">→</span>
+  <span class="node">后续 SFX 正常发声</span>
+</div>
+
+<h3>3.2 BGM 文件缺失降级</h3>
+<p>若 <code>public/bgm.mp3</code>（及其他备选格式）均不存在，系统行为：</p>
+<ul>
+  <li>控制台可以有一条 <code>console.warn</code> 提示（非必须），但绝对不弹出任何用户可见的错误提示。</li>
+  <li>游戏正常运行，BGM 模块处于「无文件」状态，BGM 音量滑块拖动不报错。</li>
+  <li>SFX 完全不受影响，正常发声。</li>
+</ul>
+
+<h3>3.3 SFX 并发播放</h3>
+<p>同一时刻可能有多个 SFX 同时触发（例如：多个 Joker 同时触发，或发牌时多张牌错峰播放），系统必须支持 SFX 并发不相互阻断。Web Audio API 天然支持多个 OscillatorNode 同时运行，工程师无需做串行队列。</p>
+
+<h3>3.4 出牌全流程音效时序</h3>
+<p>以下为出牌一手时，SFX 与 <code>handlePlay()</code> 动画步骤的对应关系（仅示意时序，不规定具体 ms 数，与动画速度倍率解耦）：</p>
+
+<table>
+  <tr><th>动画步骤</th><th>触发的 SFX</th></tr>
+  <tr><td>Step 0：玩家点击出牌按钮前，选/取消选牌</td><td>SFX-01（选牌）/ SFX-02（取消选牌）</td></tr>
+  <tr><td>Step 1：飞牌到出牌区</td><td>SFX-03（飞牌，飞牌开始时触发一次）</td></tr>
+  <tr><td>Step 3：逐张高亮计分</td><td>SFX-04（每张牌高亮一声，音高递增）</td></tr>
+  <tr><td>Step 4：Joker 触发金光</td><td>SFX-05（每个触发的 Joker 一声）</td></tr>
+  <tr><td>Step 5：公式爆出大字</td><td>SFX-06（爆分音，最爽的一下）</td></tr>
+  <tr><td>Step 7：发牌补手牌</td><td>SFX-07（每张入手一声，随错峰发牌依次触发）</td></tr>
+</table>
+
+<h2>四、文案锁定</h2>
+
+<div class="callout tip">
+  <strong>本轮无新增用户可见文案</strong>
+  音效系统在后台运行，不向用户展示任何新的文字。设置面板中「BGM 音量」和「SFX 音量」两个标签名称沿用第 1 轮 PRD §六 文案锁定表，不修改。唯一可能新增的文字是 BGM 文件缺失时的控制台日志（开发者可见，用户不可见），属于工程侧决定，不在 PRD 文案锁定范围。
+</div>
+
+<table>
+  <tr><th>位置</th><th>文案（沿用，原样不改）</th></tr>
+  <tr><td>设置面板 BGM 音量标签</td><td><code>BGM 音量</code></td></tr>
+  <tr><td>设置面板 SFX 音量标签</td><td><code>SFX 音量</code></td></tr>
+</table>
+
+<h2>五、范围边界（本轮不做）</h2>
+
+<div class="callout warn">
+  <strong>以下内容一律不做，留给后续轮次或本课程范围外</strong>
+</div>
+
+<ul>
+  <li><b>粒子特效升级</b>（通关撒金币动画、爆分粒子、进商店烟花）：虽同属原计划第 3 轮，但本 PRD 只覆盖音效，粒子升级留待后续单独处理。</li>
+  <li><b>音效开关独立按钮</b>：不新增「静音」或「音效开关」按钮，用「音量调至 0」代替静音功能。</li>
+  <li><b>多套音色主题</b>：本轮只做一套默认像素电子音风格，不做音效主题切换。</li>
+  <li><b>接第三方音效库</b>（Howler.js、Tone.js、Pizzicato 等）：全部用原生 Web Audio API，不引入任何外部音频库。</li>
+  <li><b>BGM 跨曲目切换</b>：不做播放列表、随机播放、下一首等功能，单文件循环。</li>
+  <li><b>音效淡入淡出</b>：BGM 启动时可以有 0.5s 淡入（工程师自行决定），但不要求做复杂的淡入淡出管理。</li>
+  <li><b>设置项新增</b>：不新增任何设置面板选项，沿用第 1 轮已有的 BGM/SFX 两个滑块。</li>
+  <li><b>装 agent-browser 跑自动化验收</b> → 第 4 轮。</li>
+  <li><b>Tauri 跨端打包</b> → 第 5 轮。</li>
+  <li><b>DeepSeek 真 LLM 接入</b> → 第 6 轮。</li>
+</ul>
+
+<h2>六、依赖与外部资源</h2>
+
+<table>
+  <tr><th>资源</th><th>说明</th></tr>
+  <tr>
+    <td>BGM 音频文件</td>
+    <td>
+      由学员自备，放入项目 <code>public/</code> 目录。建议文件名（按优先级顺序）：<br>
+      <code>public/bgm.mp3</code>（首选，兼容性最好）<br>
+      <code>public/bgm.ogg</code>（Firefox 偏好）<br>
+      <code>public/bgm.wav</code>（无压缩，文件较大不推荐）<br>
+      文件缺失时静默降级，不影响游戏运行。
+    </td>
+  </tr>
+  <tr>
+    <td>SFX 音频文件</td>
+    <td>无，全部代码合成，零文件依赖。</td>
+  </tr>
+  <tr>
+    <td>第三方库</td>
+    <td>无，不引入任何新的 npm 包。</td>
+  </tr>
+  <tr>
+    <td>API Key</td>
+    <td>不需要。</td>
+  </tr>
+  <tr>
+    <td>网络访问</td>
+    <td>SFX 完全离线；BGM 仅读取 <code>public/</code> 本地文件，不联网。</td>
+  </tr>
+</table>
+
+<h2>七、验收清单</h2>
+
+<h3>BGM 基础行为</h3>
+<ul class="checklist">
+  <li>页面加载后，BGM <b>不</b>自动播放，不报错，不弹窗</li>
+  <li>首次点击任意按钮或手牌后，BGM 开始循环播放（前提：音量 &gt; 0 且文件存在）</li>
+  <li>BGM 贯穿 <code>playing</code> / <code>shop</code> / <code>won</code> / <code>lost</code> 所有状态，状态切换不中断播放</li>
+  <li>拖动「BGM 音量」滑块，播放音量即时响应变化</li>
+  <li>BGM 音量调至 0，BGM 停止发声</li>
+  <li>BGM 音量从 0 调回正值，BGM 恢复播放</li>
+  <li>刷新页面后，BGM 音量设置保持（从 <code>localStorage</code> 读回），首次交互后以保存的音量播放</li>
+</ul>
+
+<h3>BGM 降级</h3>
+<ul class="checklist">
+  <li><code>public/bgm.mp3</code>（及其他备选格式）不存在时，页面正常加载，无用户可见报错</li>
+  <li>文件缺失时，BGM 滑块可以正常拖动，不报错</li>
+  <li>文件缺失时，所有 SFX 正常发声，不受影响</li>
+</ul>
+
+<h3>SFX 出牌全流程</h3>
+<ul class="checklist">
+  <li>点击手牌选中：发出 SFX-01（短促上扬单音）</li>
+  <li>点击已选中手牌取消：发出 SFX-02（下行收回音）</li>
+  <li>点击出牌按钮，飞牌动画开始：发出 SFX-03（嗖声）</li>
+  <li>逐张高亮计分时，每张各发出 SFX-04 一声，5 张音高依次递增，听感有明显上行感</li>
+  <li>Joker 触发金光时，每个触发的 Joker 各发出 SFX-05 一声</li>
+  <li>公式大字爆出时，发出 SFX-06（爽感冲击音，全局最响）</li>
+  <li>补牌发牌时，每张入手各发出 SFX-07 一声，随错峰动画依次触发</li>
+</ul>
+
+<h3>SFX 胜负与关卡</h3>
+<ul class="checklist">
+  <li>3 关全过，进入 <code>won</code> 状态时，发出 SFX-08（胜利琶音，可感知到庆典感）</li>
+  <li>某关失败，进入 <code>lost</code> 状态时，发出 SFX-09（失败下行音，与 SFX-08 音色明显区分）</li>
+  <li>小/中盲注通关进入商店时，发出 SFX-10（进店叮咚音）</li>
+  <li>通关奖励金币到账时，按奖励金额大小发出 SFX-11 连响（1–3 次，清脆硬币音）</li>
+</ul>
+
+<h3>SFX 商店与按钮</h3>
+<ul class="checklist">
+  <li>商店中点击「购买 $X」成功买卡时，发出 SFX-12（愉悦双音叮当）</li>
+  <li>点击弃牌按钮时，发出 SFX-14（低沉短促噗音）</li>
+  <li>点击其他普通按钮（跳过、重新开始、关闭设置、排序）时，发出 SFX-13（通用咔哒）</li>
+  <li>拖动设置面板滑块时，SFX-15 节流触发（每 100ms 最多一次），不影响正常操作</li>
+  <li>切换动画速度按钮时，发出 SFX-15 一声</li>
+</ul>
+
+<h3>SFX AI 出牌</h3>
+<ul class="checklist">
+  <li>点击「🤖 AI 出牌」进入思考状态后，SFX-16（科技脉冲音）约每 400ms 触发一次，直至思考结束</li>
+  <li>AI 思考完成、即将出牌时，发出 SFX-17（确定叮音），紧接在最后一次 SFX-16 之后</li>
+</ul>
+
+<h3>SFX 音量控制</h3>
+<ul class="checklist">
+  <li>拖动「SFX 音量」滑块，下一次触发的 SFX 以新音量发声</li>
+  <li>SFX 音量调至 0，所有 SFX 静音（触发但无声）</li>
+  <li>刷新页面后，SFX 音量设置保持，后续操作以保存的音量发声</li>
+</ul>
+
+<h3>并发与稳定性</h3>
+<ul class="checklist">
+  <li>多个 Joker 同时触发时，SFX-05 并发播放不互相阻断</li>
+  <li>发牌补牌时，多个 SFX-07 错峰触发不互相阻断</li>
+  <li>快速点击多张手牌时，SFX-01/02 不因并发而报错或静默</li>
+  <li>构建通过：<code>npm run build</code> 结果 0 error、0 warning</li>
+</ul>
+
+<h2>八、工程化约束</h2>
+
+<div class="callout gold">
+  <strong>学员场景目标：一次性跑完，不需要中途干预</strong>
+  本提示词将直接交付给学员，学员喂给 Claude Code 后自动完成实施。工程化约束必须严格遵守。
+</div>
+
+<h3>8.1 每轮一个 commit <span class="lock">锁定</span></h3>
+<p>本轮（第 3 轮）实施完成后，产生<b>恰好 1 个 commit</b>（若中途有修复，squash 成 1 个）。</p>
+<p><b>commit message 格式（原样使用）</b>：</p>
+<pre><code>feat: 第 3 轮 - 音效系统（v1.2.0）</code></pre>
+
+<h3>8.2 不要造多余文档</h3>
+<p>除 <code>CLAUDE.md</code> 和 <code>README.md</code> 外，不创建任何 <code>.md</code> 文件。PRD / DESIGN 以 <code>.html</code> 形式存在，不用 Markdown。</p>
+
+<h3>8.3 构建必过</h3>
+<p><code>npm run build</code> 必须 0 error、0 warning（ESLint 警告也清掉）。</p>
+
+<h3>8.4 不要中途打断学员</h3>
+<p>Agent 实施时不允许中途打断学员要决策。所有歧义在本 PRD 内已锁定（触发时机 / 音色方向 / 滑块接线 / 降级行为 / 并发策略全部锁死）。若有细节歧义，按「零依赖、零报错、最简实现」原则兜底。</p>
+
+<h3>8.5 不影响已有功能</h3>
+<p>音效系统是纯增量功能，不修改现有玩法逻辑、状态机、动画时间线、UI 布局。若实施中发现需要修改现有代码以挂载音效事件，改动必须<b>最小侵入</b>，不破坏第 1 轮的任何验收清单项。</p>
+
+<hr>
+
+<p style="text-align:center;color:var(--muted);font-size:13px;">
+本 PRD 由产品经理 AI 同事产出。全栈工程师 AI 同事按本 PRD + 第 1 轮 DESIGN 规范实施代码，无需额外 DESIGN 文档（本轮无新增 UI）。
+</p>
+
+<div class="footer">
+  小丑牌教学 · B2 · 第 3 轮 PRD · 音效系统 · v1
+</div>
+
+</div>
+</body>
+</html>
